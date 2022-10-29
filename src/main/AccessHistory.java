@@ -1,4 +1,9 @@
 package main;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
+
 public class AccessHistory {
     private int hits;
     private int misses;
@@ -36,13 +41,21 @@ public class AccessHistory {
     
     public String getFormattedHistory(boolean output_format) {
         String result = "";
+
+        // define '.' como o digito separador dos decimais
+        DecimalFormatSymbols decimalDot = new DecimalFormatSymbols();
+        decimalDot.setDecimalSeparator('.');
+
+        // formata a saida como um decimal com duas casas apos a virgula e com o separador definido
+        DecimalFormat df = new DecimalFormat("0.00", decimalDot);
+        
         if (output_format == true) {
             result = this.getTotalAccess() + " " +
-                     this.calculateHitRate() + " " +
-                     this.calculateMissRate() + " " +
-                     this.calculateCompulsoryMissPercent() + " " + 
-                     this.calculateCapacityMissPercent() + " " + 
-                     this.calculateConflictMissPercent() + " ";
+            df.format(this.calculateHitRate()) + " " +
+            df.format(this.calculateMissRate()) + " " +
+            df.format(this.calculateCompulsoryMissPercent()) + " " + 
+            df.format(this.calculateCapacityMissPercent()) + " " + 
+            df.format(this.calculateConflictMissPercent()) + " ";
         }
         else {
             result = "Total de acessos: " + this.getTotalAccess() + "\n" +
@@ -51,11 +64,11 @@ public class AccessHistory {
                      "Total Misses Compulsórios: " + this.compulsory_misses + "\n" +
                      "Total Misses Capacidade: " + this.capacity_misses + "\n" +
                      "Total Misses Conflito: " + this.conflict_misses + "\n" +
-                     "Taxa de Hit: " + this.calculateHitRate() * 100.0 + "%\n" +
-                     "Taxa de Misses: " + this.calculateMissRate() * 100.0 + "%\n" +
-                     "Taxa Misses Compulsórios: " + this.calculateCompulsoryMissPercent() * 100.0 + "%\n" +
-                     "Taxa Misses Capacidade: " + this.calculateCapacityMissPercent() * 100.0 + "%\n" +
-                     "Taxa Misses Conflito: " + this.calculateConflictMissPercent() * 100.0 + "%\n";
+                     "Taxa de Hit: " + df.format(this.calculateHitRate() * 100.0) + "%\n" +
+                     "Taxa de Misses: " + df.format(this.calculateMissRate() * 100.0) + "%\n" +
+                     "Taxa Misses Compulsórios: " + df.format(this.calculateCompulsoryMissPercent() * 100.0) + "%\n" +
+                     "Taxa Misses Capacidade: " + df.format(this.calculateCapacityMissPercent() * 100.0) + "%\n" +
+                     "Taxa Misses Conflito: " + df.format(this.calculateConflictMissPercent() * 100.0) + "%\n";
         }
 
         return result;
