@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import main.politicas_substituicao.Random;
+import main.politicas_substituicao.Lru;
+import main.politicas_substituicao.Fifo;
 import main.errors.WrongReplacementPolicy;
 
 public class Main {
@@ -13,16 +15,16 @@ public class Main {
         Arguments arguments = new Arguments(args);
         
         Cache cache_l1;
-
+        
         if (arguments.replacement == 'R') {
             cache_l1 = new Random(arguments.nsets, arguments.assoc, arguments.bsize);
         }
-        // else if (arguments.replacement == 'L') {
-        //     cache_l1 = new Lru();
-        // }
-        // else if (arguments.replacement == 'F') {
-        //     cache_l1 = new Fifo();
-        // }
+        else if (arguments.replacement == 'L') {
+            cache_l1 = new Lru(arguments.nsets, arguments.assoc, arguments.bsize);
+        }
+        else if (arguments.replacement == 'F') {
+            cache_l1 = new Fifo(arguments.nsets, arguments.assoc, arguments.bsize);
+        }
         else {
             throw new WrongReplacementPolicy("The replacement policy " + arguments.replacement + " is not implemented!!!");
         }

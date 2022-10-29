@@ -27,8 +27,7 @@ public class Random extends Cache {
             this.last_index = 0;
             this.is_full = false;
             
-            this.positions = new ArrayList<>();
-            positions.ensureCapacity(assoc);
+            this.positions = new ArrayList<>(assoc);
 
             for (int c = 0; c < assoc; c++) {
                 positions.add(new Line());
@@ -44,9 +43,8 @@ public class Random extends Cache {
     public Random(int nsets, int assoc, int bsize) throws NotPowerOf2 {
         super(nsets, assoc, bsize);
         this.total_bytes_used = 0;
-        this.memory = new ArrayList<>();
-        this.memory.ensureCapacity(nsets);
-        this.max_capacity = this.getNsets() * this.getAssoc() * this.getBsize();
+        this.max_capacity = nsets * assoc * bsize;
+        this.memory = new ArrayList<>(nsets);
         for (int c = 0; c < nsets; c++){
             this.memory.add(new Set(assoc));
         }
