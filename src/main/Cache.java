@@ -14,13 +14,13 @@ public abstract class Cache {
 
     public Cache(int nsets, int assoc, int bsize) throws NotPowerOf2 {
         if (isPowerOf2(nsets) == false) {
-            throw new NotPowerOf2("O valor de nsets deve ser uma potência de 2");
+            throw new NotPowerOf2("O valor de nsets deve ser uma potência de 2, valor lido: " + nsets);
         }
         if (isPowerOf2(assoc) == false) {
-            throw new NotPowerOf2("O valor de assoc deve ser uma potência de 2");
+            throw new NotPowerOf2("O valor de assoc deve ser uma potência de 2, valor lido: " + assoc);
         }
         if (isPowerOf2(bsize) == false) {
-            throw new NotPowerOf2("O valor de bsize deve ser uma potência de 2");
+            throw new NotPowerOf2("O valor de bsize deve ser uma potência de 2, valor lido: " + bsize);
         }
 
         this.nsets = nsets;
@@ -69,7 +69,7 @@ public abstract class Cache {
          * Se existir 2 ou mais bits 1 então o número é uma soma de potências de 2 e não
          * será o uma potência de 2 exata
          */
-        return Integer.bitCount(1) <= 1;
+        return Integer.bitCount(number) <= 1;
     }
 
     public int getTag(int adress) {
