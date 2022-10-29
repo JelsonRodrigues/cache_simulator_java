@@ -33,6 +33,32 @@ public class Random extends Cache {
                 positions.add(new Line());
             }
         }
+
+        private void replace(int new_tag) {
+            int position = RandomGenerator.getDefault().nextInt(this.positions.size());
+            this.positions.get(position).tag = new_tag;
+            this.positions.get(position).valid = true;
+        }
+
+        private void add(int new_tag) {
+            this.positions.get(this.last_index).tag = new_tag;
+            this.positions.get(this.last_index).valid = true;
+
+            this.last_index += 1;
+            
+            if (this.last_index >= this.positions.size()) {
+                this.is_full = true;
+            }
+        }
+
+        public void write(int new_tag) {
+            if (this.is_full) {
+                replace(new_tag);
+            }
+            else {
+                add(new_tag);
+            }
+        }
     }
 
     private ArrayList<Set> memory;
@@ -69,24 +95,14 @@ public class Random extends Cache {
         }
 
         // Miss
-        int position = 0;
         // Tratamento da falta e atualização do histórico de acesso
         if (set.is_full == false) {
             // Compulsorio
-            position = set.last_index;
-            set.last_index += 1;
-            if (set.last_index >= set.positions.size()) {
-                set.is_full = true;
-            }
-
             this.total_bytes_used += this.getBsize();
 
             this.getHistory().addMiss(MissType.COMPULSORY);
         }
         else {
-            // Posicao a ser substituida
-            position = RandomGenerator.getDefault().nextInt(assoc) % this.getAssoc();
-
             if (this.is_full()) {
                 // Capacidade
                 this.getHistory().addMiss(MissType.CAPACITY);
@@ -97,9 +113,7 @@ public class Random extends Cache {
             }
         }
 
-        Line line = set.positions.get(position); 
-        line.tag = tag_of_adress;
-        line.valid = true;
+        set.write(tag_of_adress);
     }
 
     private boolean is_full() {

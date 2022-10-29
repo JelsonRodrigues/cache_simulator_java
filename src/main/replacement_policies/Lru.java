@@ -24,13 +24,13 @@ public class Lru extends Cache {
 
     private class Set {
         public ArrayList<Line> positions;
-        public int total_bytes_used;
         public int index_least_recently_used;
+        public int last_index;
         public boolean is_full;
 
         public Set(int assoc) {
-            this.total_bytes_used = 0;
             this.index_least_recently_used = 0;
+            this.last_index = 0;
             this.is_full = false;
             
             this.positions = new ArrayList<>(assoc);
@@ -40,7 +40,38 @@ public class Lru extends Cache {
             }
         }
 
-        public void updateAgeBits(int most_recently_used_index) {
+        private void replace(int new_tag) {
+            int position = this.index_least_recently_used;
+            this.positions.get(position).tag = new_tag;
+            this.positions.get(position).valid = true;
+            this.updateAgeBits(position);
+        }
+
+        private void add(int new_tag) {
+            this.positions.get(this.last_index).tag = new_tag;
+            this.positions.get(this.last_index).valid = true;
+            updateAgeBits(this.last_index);
+
+            this.last_index += 1;
+            if (this.last_index >= this.positions.size()) {
+                this.is_full = true;
+            }
+        }
+
+        public void write(int new_tag) {
+            if (this.is_full) {
+                replace(new_tag);
+            }
+            else {
+                add(new_tag);
+            }
+        }
+
+        public void read(int index) {
+            updateAgeBits(index);
+        }
+
+        private void updateAgeBits(int most_recently_used_index) {
             int age_bits_acceced_value = this.positions.get(most_recently_used_index).age_bits;
             for (int c = 0; c < this.positions.size(); c++) {
                 Line line = this.positions.get(c);
@@ -83,7 +114,7 @@ public class Lru extends Cache {
             Line line = set.positions.get(c);
             if (line.valid && line.tag == tag_of_adress) {
                 this.getHistory().addHit();
-                set.updateAgeBits(c);
+                set.read(c);
                 return;
             }
         }
@@ -91,12 +122,7 @@ public class Lru extends Cache {
         // Miss
         // Tratamento da falta e atualização do histórico de acesso
         if (set.is_full == false) {
-            // Compulsorio
-            set.total_bytes_used += getBsize();
-            if (set.total_bytes_used >= this.getAssoc() * this.getBsize()) {
-                set.is_full = true;
-            }
-
+            // Compulsorio 
             this.total_bytes_used += this.getBsize();
 
             this.getHistory().addMiss(MissType.COMPULSORY);
@@ -112,11 +138,7 @@ public class Lru extends Cache {
             }
         }
 
-        int position = set.index_least_recently_used;
-        Line line = set.positions.get(position); 
-        line.tag = tag_of_adress;
-        line.valid = true;
-        set.updateAgeBits(position);
+        set.write(tag_of_adress);
     }
 
     private boolean is_full() {

@@ -19,13 +19,11 @@ public class Fifo extends Cache {
 
     private class Set {
         public ArrayList<Line> positions;
-        public int total_bytes_used;
         public int last_index;
         public int index_first_in;
         public boolean is_full;
 
         public Set(int assoc) {
-            this.total_bytes_used = 0;
             this.index_first_in = 0;
             this.last_index = 0;
             this.is_full = false;
@@ -37,18 +35,31 @@ public class Fifo extends Cache {
             }
         }
 
-        public void replace(int new_tag) {
+        private void replace(int new_tag) {
             this.positions.get(this.index_first_in).tag = new_tag;
             this.positions.get(this.index_first_in).valid = true;
 
             this.index_first_in = (this.index_first_in + 1) % this.positions.size(); 
         }
 
-        public void add(int new_tag) {
+        private void add(int new_tag) {
             this.positions.get(this.last_index).tag = new_tag;
             this.positions.get(this.last_index).valid = true;
 
             this.last_index += 1;
+            
+            if (this.last_index >= this.positions.size()) {
+                this.is_full = true;
+            }
+        }
+
+        public void write(int new_tag){
+            if (this.is_full) {
+                replace(new_tag);
+            }
+            else {
+                add(new_tag);
+            }
         }
     }
 
@@ -88,15 +99,7 @@ public class Fifo extends Cache {
         // Tratamento da falta e atualização do histórico de acesso
         if (set.is_full == false) {
             // Compulsorio
-            set.add(tag_of_adress);
-
-            set.total_bytes_used += getBsize();
-            if (set.total_bytes_used >= this.getAssoc() * this.getBsize()) {
-                set.is_full = true;
-            }
-
             this.total_bytes_used += this.getBsize();
-
             this.getHistory().addMiss(MissType.COMPULSORY);
         }
         else {
@@ -108,10 +111,10 @@ public class Fifo extends Cache {
                 // Conflito
                 this.getHistory().addMiss(MissType.CONFLICT);
             }
-            
-            set.replace(tag_of_adress);
         }
 
+        // Add or replace the value within the set
+        set.write(tag_of_adress);
     }
 
     private boolean is_full() {
