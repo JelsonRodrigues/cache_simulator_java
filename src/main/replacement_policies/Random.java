@@ -1,4 +1,4 @@
-package main.politicas_substituicao;
+package main.replacement_policies;
 
 import java.util.ArrayList;
 import java.util.random.RandomGenerator;

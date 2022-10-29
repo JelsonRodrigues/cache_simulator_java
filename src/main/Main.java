@@ -3,10 +3,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import main.politicas_substituicao.Random;
-import main.politicas_substituicao.Lru;
-import main.politicas_substituicao.Fifo;
+
 import main.errors.WrongReplacementPolicy;
+import main.replacement_policies.Fifo;
+import main.replacement_policies.Lru;
+import main.replacement_policies.Random;
 
 public class Main {
     public static final int NUMBER_OF_NEEDED_ARGUMENTS = 6;
@@ -15,7 +16,7 @@ public class Main {
         Arguments arguments = new Arguments(args);
         
         Cache cache_l1;
-        
+
         if (arguments.replacement == 'R') {
             cache_l1 = new Random(arguments.nsets, arguments.assoc, arguments.bsize);
         }

@@ -1,4 +1,4 @@
-package main.politicas_substituicao;
+package main.replacement_policies;
 
 import java.util.ArrayList;
 
@@ -6,52 +6,49 @@ import main.Cache;
 import main.MissType;
 import main.errors.NotPowerOf2;
 
-public class Lru extends Cache {
-    /*
-     * A lógica utilizada para implementação do LRU foi https://youtu.be/bq6N7Ym81iI
-    */
+public class Fifo extends Cache {
     private class Line {
         public boolean valid;
         public int tag;
-        public int age_bits;
 
-        public Line(int age_bits){
+        public Line(){
             this.valid = false;
             this.tag = 0;
-            this.age_bits = age_bits;
         }
     }
 
     private class Set {
         public ArrayList<Line> positions;
         public int total_bytes_used;
-        public int index_least_recently_used;
+        public int last_index;
+        public int index_first_in;
         public boolean is_full;
 
         public Set(int assoc) {
             this.total_bytes_used = 0;
-            this.index_least_recently_used = 0;
+            this.index_first_in = 0;
+            this.last_index = 0;
             this.is_full = false;
             
             this.positions = new ArrayList<>(assoc);
 
             for (int c = 0; c < assoc; c++) {
-                positions.add(new Line(c));
+                positions.add(new Line());
             }
         }
 
-        public void updateAgeBits(int most_recently_used_index) {
-            int age_bits_acceced_value = this.positions.get(most_recently_used_index).age_bits;
-            for (int c = 0; c < this.positions.size(); c++) {
-                Line line = this.positions.get(c);
-                if (line.age_bits > age_bits_acceced_value) {
-                    line.age_bits -= 1;
-                }
-                if (line.age_bits == 0) {
-                    index_least_recently_used = c;
-                }
-            }
-            this.positions.get(most_recently_used_index).age_bits = this.positions.size() - 1;
+        public void replace(int new_tag) {
+            this.positions.get(this.index_first_in).tag = new_tag;
+            this.positions.get(this.index_first_in).valid = true;
+
+            this.index_first_in = (this.index_first_in + 1) % this.positions.size(); 
+        }
+
+        public void add(int new_tag) {
+            this.positions.get(this.last_index).tag = new_tag;
+            this.positions.get(this.last_index).valid = true;
+
+            this.last_index += 1;
         }
     }
 
@@ -59,7 +56,7 @@ public class Lru extends Cache {
     private int total_bytes_used;
     private int max_capacity;
 
-    public Lru(int nsets, int assoc, int bsize) throws NotPowerOf2 {
+    public Fifo(int nsets, int assoc, int bsize) throws NotPowerOf2 {
         super(nsets, assoc, bsize);
         this.total_bytes_used = 0;
         this.max_capacity = nsets * assoc * bsize;
@@ -83,7 +80,6 @@ public class Lru extends Cache {
             Line line = set.positions.get(c);
             if (line.valid && line.tag == tag_of_adress) {
                 this.getHistory().addHit();
-                set.updateAgeBits(c);
                 return;
             }
         }
@@ -92,6 +88,8 @@ public class Lru extends Cache {
         // Tratamento da falta e atualização do histórico de acesso
         if (set.is_full == false) {
             // Compulsorio
+            set.add(tag_of_adress);
+
             set.total_bytes_used += getBsize();
             if (set.total_bytes_used >= this.getAssoc() * this.getBsize()) {
                 set.is_full = true;
@@ -110,13 +108,10 @@ public class Lru extends Cache {
                 // Conflito
                 this.getHistory().addMiss(MissType.CONFLICT);
             }
+            
+            set.replace(tag_of_adress);
         }
 
-        int position = set.index_least_recently_used;
-        Line line = set.positions.get(position); 
-        line.tag = tag_of_adress;
-        line.valid = true;
-        set.updateAgeBits(position);
     }
 
     private boolean is_full() {
