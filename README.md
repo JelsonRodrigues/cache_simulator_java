@@ -40,7 +40,7 @@ A forma de utilizar o simulador é a seguinte <br>
 `formato_saida`-> é a forma que os dados serão exibidos, quando igual a 1 a saída tem o seguinte formato: <br> 
 `total_acessos hit_hate miss_rate percentual_misses_compulsorios percentual_misses_capacidade percentual_misses_conflito` <br>
 
-quando igual diferente de 1, tem o seguinte formato:
+quando diferente de 1, tem o seguinte formato:
 
 Total de acessos: `total_acessos`<br>
 Total Hits: `total_hits`<br>
