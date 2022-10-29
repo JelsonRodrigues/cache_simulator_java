@@ -5,7 +5,7 @@ public class Arguments {
     public final int nsets;
     public final int assoc;
     public final int bsize;
-    public final char replacement;
+    public final String replacement;
     public final boolean output_format;
     public final String filename;
 
@@ -17,7 +17,7 @@ public class Arguments {
         this.nsets = Integer.parseInt(args[0]);
         this.bsize = Integer.parseInt(args[1]);
         this.assoc = Integer.parseInt(args[2]);
-        this.replacement = args[3].charAt(0);
+        this.replacement = args[3];
         this.output_format = Integer.parseInt(args[4]) == 1 ? true : false;
         this.filename = args[5];
     }

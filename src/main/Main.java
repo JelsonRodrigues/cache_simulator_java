@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 
 import main.errors.WrongReplacementPolicy;
 import main.replacement_policies.Fifo;
+import main.replacement_policies.Lfu;
 import main.replacement_policies.Lru;
+import main.replacement_policies.Mru;
 import main.replacement_policies.Random;
 
 public class Main {
@@ -17,14 +19,20 @@ public class Main {
         
         Cache cache_l1;
 
-        if (arguments.replacement == 'R') {
+        if (arguments.replacement.equals("R")) {
             cache_l1 = new Random(arguments.nsets, arguments.assoc, arguments.bsize);
         }
-        else if (arguments.replacement == 'L') {
+        else if (arguments.replacement.equals("L")) {
             cache_l1 = new Lru(arguments.nsets, arguments.assoc, arguments.bsize);
         }
-        else if (arguments.replacement == 'F') {
+        else if (arguments.replacement.equals("F")) {
             cache_l1 = new Fifo(arguments.nsets, arguments.assoc, arguments.bsize);
+        }
+        else if (arguments.replacement.equals("LFU")){
+            cache_l1 = new Lfu(arguments.nsets, arguments.assoc, arguments.bsize);
+        }
+        else if (arguments.replacement.equals("MRU")){
+            cache_l1 = new Mru(arguments.nsets, arguments.assoc, arguments.bsize);
         }
         else {
             throw new WrongReplacementPolicy("The replacement policy " + arguments.replacement + " is not implemented!!!");
@@ -40,7 +48,8 @@ public class Main {
             cache_l1.read(address);
         }
         inputStream.close();
-
+        
+        System.out.println("Politica de substituicao: " + arguments.replacement);
         System.out.println(cache_l1.getHistory().getFormattedHistory(arguments.output_format));
     }
     
