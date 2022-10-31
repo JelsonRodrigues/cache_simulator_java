@@ -49,7 +49,9 @@ public class Main {
         }
         inputStream.close();
         
-        System.out.println("Politica de substituicao: " + arguments.replacement);
+        if (arguments.output_format == false) {
+            System.out.println("Politica de substituicao: " + arguments.replacement);
+        }
         System.out.println(cache_l1.getHistory().getFormattedHistory(arguments.output_format));
     }
     
